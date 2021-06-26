@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webrtc获取音视频设备</title>
+</head>
+<body>
+  一个简单的h5页面
+  <video width="200" muted id="video" autoplay playsinline src=""></video>
+  <div>
+    <label>
+      <span>音频输入：</span>
+      <select name="audioInput" id="audioInput"></select>
+    </label>
+  </div>
+  <div>
+    <label>
+      <span>音频输出：</span>
+      <select name="audioOutput" id="audioOutput"></select>
+    </label>
+  </div>
+  <div>
+    <label>
+      <span>视频输入：</span>
+      <select name="videoInput" id="videoInput"></select>
+    </label>
+  </div>
+
+
+</body>
+<script src="./js/adapter-latest.js"></script>
+<script src="./js/mediaStream.js"></script>
+</html>
