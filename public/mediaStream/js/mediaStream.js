@@ -19,17 +19,29 @@ const getUserMedia = _=> {
     video: { //关闭设置false, 具体配置用对象
       width: 200,
       height: 200,
-      frameRate: 30, //帧率
+      frameRate: {min:10, ideal: 15, max: 30 }, //帧率,width，height，这些数字都有min，max，ideal
       facingMode: 'user', // enviroment:后置摄像头;user:前置摄像头;left:前置左侧;right:前置右侧
     },
     audio: {
       volume: 1, // 音量 ，0-1
       sampleRate: 8000, //采样率
-    } 
+      sampleSize: 16, // 采样位深，一般是16位
+      echoCancellation: true, // true,false,是否启用回音消除
+      autoGainControl: true, // true, false 是否启用自动增强。
+      noiseSuppression: true,
+    }
   }
   navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-    videPlay.srcObject = stream
+    // videPlay.srcObject = stream
     console.log('getUserMedia', stream)
+    // 旧的浏览器可能没有srcObject
+    if ("srcObject" in videPlay) {
+      video.srcObject = stream;
+    } else {
+      // 防止在新的浏览器里使用它，应为它已经不再支持了
+      videPlay.src = window.URL.createObjectURL(stream);
+    }
+
     // * 获取设备信息
     // * 获取到权限才可以输出label和id
     return navigator.mediaDevices.enumerateDevices()
