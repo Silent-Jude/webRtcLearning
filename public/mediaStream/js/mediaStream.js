@@ -20,7 +20,7 @@ const getUserMedia = _=> {
       width: 200,
       height: 200,
       frameRate: {min:10, ideal: 15, max: 30 }, //帧率,width，height，这些数字都有min，max，ideal
-      facingMode: 'user', // enviroment:后置摄像头;user:前置摄像头;left:前置左侧;right:前置右侧
+      facingMode: 'enviroment', // enviroment:后置摄像头;user:前置摄像头;left:前置左侧;right:前置右侧
     },
     audio: {
       volume: 1, // 音量 ，0-1
