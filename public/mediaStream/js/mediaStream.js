@@ -35,28 +35,43 @@ const setDeviceInfo = deviceInfos => {
  */
 const getUserMedia = _=> {
   const videoDeviceId = videoInputSelect.value
-  // 针对音视频的限制和设置,值改变后必须重新调用才生效。
-  const constraints = {
-    video: { //关闭设置false, 具体配置用对象  https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#properties_of_audio_tracks
-      width: 200, // {min: 200, ideal: 250, max: 300 }
-      height: 200,
-      frameRate: {min:10, ideal: 15, max: 30 }, //帧率,width，height，这些数字都有min，max，ideal
-      facingMode: 'enviroment', // enviroment:后置摄像头;user:前置摄像头;left:前置左侧;right:前置右侧
-      deviceID: videoDeviceId || undefined, // 设备id，以便切换。
-    },
-    audio: { // https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#properties_of_video_tracks
-      volume: 1, // 音量 ，0-1
-      sampleRate: 8000, //采样率
-      sampleSize: 16, // 采样位深，一般是16位
-      echoCancellation: true, // true,false,是否启用回音消除
-      autoGainControl: true, // true, false 是否启用自动增强。
-      noiseSuppression: true, // true,false 降噪，也可以设置具体返回，但是文档里没有范围示例，且不在范围内的数值会导致报错。
-      latency: 100.00, // 延时，长了影响即时性，短了容易造成卡顿。
-      channelCount: 1, // 声道，单声道或者双声道，ConstrainULong类型，看不懂范围。
-      // deviceID: undefined, // 设备id，以便切换。
-      // groupID: '', // 代表同一个物理设备，输入输出这些类型。
-    },
+
+  var constraints = {
+    video : {
+      width: 640,	
+      height: 480,
+      frameRate:15,
+      facingMode: 'enviroment',
+      deviceId : deviceId ? {exact:deviceId} : undefined 
+    }, 
+    audio : false 
   }
+
+  // // 针对音视频的限制和设置,值改变后必须重新调用才生效。
+  // const constraints = {
+  //   video: { //关闭设置false, 具体配置用对象  https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#properties_of_audio_tracks
+  //     width: 200, // {min: 200, ideal: 250, max: 300 }
+  //     height: 200,
+  //     frameRate: {min:10, ideal: 15, max: 30 }, //帧率,width，height，这些数字都有min，max，ideal
+  //     facingMode: 'enviroment', // enviroment:后置摄像头;user:前置摄像头;left:前置左侧;right:前置右侧
+  //     deviceID: videoDeviceId || undefined, // 设备id，以便切换。
+  //   },
+  //   audio: { // https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#properties_of_video_tracks
+  //     volume: 1, // 音量 ，0-1
+  //     sampleRate: 8000, //采样率
+  //     sampleSize: 16, // 采样位深，一般是16位
+  //     echoCancellation: true, // true,false,是否启用回音消除
+  //     autoGainControl: true, // true, false 是否启用自动增强。
+  //     noiseSuppression: true, // true,false 降噪，也可以设置具体返回，但是文档里没有范围示例，且不在范围内的数值会导致报错。
+  //     latency: 100.00, // 延时，长了影响即时性，短了容易造成卡顿。
+  //     channelCount: 1, // 声道，单声道或者双声道，ConstrainULong类型，看不懂范围。
+  //     // deviceID: undefined, // 设备id，以便切换。
+  //     // groupID: '', // 代表同一个物理设备，输入输出这些类型。
+  //   },
+  // }
+
+
+
   navigator.mediaDevices.getUserMedia(constraints).then(stream => {
     // videPlay.srcObject = stream
     console.log('getUserMedia', stream)
