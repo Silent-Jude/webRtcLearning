@@ -15,10 +15,10 @@ app.use(serveIndex('./public'))
 app.use(express.static('./public'))
 
 // http_server
-const http_server = http.createServer(app)
-http_server.listen(80,'0.0.0.0', _=>{
-  console.log('http服务器创建成功！访问地址:http://106.55.160.183:80')
-})
+// const http_server = http.createServer(app)
+// http_server.listen(80,'0.0.0.0', _=>{
+//   console.log('http服务器创建成功！访问地址:http://106.55.160.183:80')
+// })
 
 const options = {
   key: fs.readFileSync('./cert/tongyichen.com.key'),
@@ -26,7 +26,11 @@ const options = {
 }
 const https_server = https.createServer(options,app,(req, res)=>{})
 https_server.listen(443,'0.0.0.0', _=>{
-  console.log('https服务器创建成功！访问地址:https://106.55.160.183:443')
+  console.log(`https服务器创建成功！启动时间:${new Date().toLocaleString()}`)
+  console.log('访问地址:')
+  console.log('https://106.55.160.183:443')
+  console.log('https://tongyichen.com')
+
 })
 
 
