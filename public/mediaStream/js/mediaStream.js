@@ -67,6 +67,7 @@ const getUserMedia = _=> {
       // 防止在新的浏览器里使用它，应为它已经不再支持了
       videPlay.src = window.URL.createObjectURL(stream);
     }
+    console.log('videoDeviceId', videoDeviceId)
     // * 获取设备信息
     // * 获取到权限才可以输出label和id
     return navigator.mediaDevices.enumerateDevices()
