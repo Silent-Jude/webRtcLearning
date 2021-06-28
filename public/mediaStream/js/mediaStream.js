@@ -8,6 +8,27 @@ const videPlay = document.getElementById('video')
 const audioInputSelect = document.querySelector('select#audioInput')
 const audioOutputSelect = document.querySelector('select#audioOutput')
 const videoInputSelect = document.querySelector('select#videoInput')
+
+let deviceInfoList = []
+
+const setDeviceInfo = deviceInfos => {
+  console.log('deviceInfos', deviceInfos)
+  if(deviceInfoList.length) return false
+  deviceInfos.forEach(deviceInfo => {
+    const option = document.createElement('option')
+    option.text = deviceInfo.label
+    option.value = deviceInfo.deviceId
+    if(deviceInfo.kind === 'audioinput') {
+      audioInputSelect.appendChild(option)
+    } else if (deviceInfo.kind === 'audiooutput') {
+      audioOutputSelect.appendChild(option)
+    } else if (deviceInfo.kind === 'videoinput') {
+      videoInputSelect.appendChild(option)
+    }
+  })
+  deviceInfoList = deviceInfos
+}
+
 /**
  * 请求获取音视频媒体流信息API
  * 一个流可能包含多个轨，音轨和视轨。
@@ -50,19 +71,7 @@ const getUserMedia = _=> {
     // * 获取到权限才可以输出label和id
     return navigator.mediaDevices.enumerateDevices()
   }).then(deviceInfos => {
-    console.log('deviceInfos', deviceInfos)
-    deviceInfos.forEach(deviceInfo => {
-      const option = document.createElement('option')
-      option.text = deviceInfo.label
-      option.value = deviceInfo.deviceId
-      if(deviceInfo.kind === 'audioinput') {
-        audioInputSelect.appendChild(option)
-      } else if (deviceInfo.kind === 'audiooutput') {
-        audioOutputSelect.appendChild(option)
-      } else if (deviceInfo.kind === 'videoinput') {
-        videoInputSelect.appendChild(option)
-      }
-    })
+    setDeviceInfo(deviceInfos)
   }).catch(handleError)
 }
 
