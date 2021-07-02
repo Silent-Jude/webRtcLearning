@@ -5,10 +5,50 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>webrtc获取音视频设备</title>
+
+  <style>
+    .none {
+      -webkit-filter: none;
+      filter: none;
+    }
+
+    .blur {
+      -webkit-filter: blur(3px);
+      filter: blur(3px);	
+    }
+
+    .grayscale {
+      -webkit-filter: grayscale(1);
+      filter: grayscale(1);
+    }
+
+    .invert {
+      -webkit-filter: invert(1);
+      filter: invert(1);
+    }
+
+    .sepia {
+      -webkit-filter: sepia(1);
+      filter: sepia(1);
+    }
+
+  </style>
+
 </head>
 <body>
-  一个简单的h5页面
-  <video width="200" muted id="video" autoplay playsinline src=""></video>
+  <div class="video_wrap">
+    <span>视频窗口：</span>
+    <video class="none" width="120" height="120" muted id="video" autoplay playsinline src=""></video>
+    <!-- <span>视频约束信息：见console</span> -->
+    <span>录制视频播放器:</span>
+    <video class="none" width="120" height="120" muted id="recVideo" autoplay playsinline src=""></video>
+    <!-- <div id="videoInfo" style="display: inline-block;width:520px;height:300px;word-wrap: break-word;"></div> -->
+  </div>
+  <div class="rec_btns">
+    <button id="startRecordBtn">开始录制</button>
+    <button id="playRecordBtn" disabled>开始播放</button>
+    <button id="downloadRecordBtn" disabled>下载录制视频</button>
+  </div>
   <div>
     <label>
       <span>音频输入：</span>
@@ -27,11 +67,33 @@
       <select name="videoInput" id="videoInput"></select>
     </label>
   </div>
-
+  <div>
+    <label>效果滤镜:</label>
+    <select id="filter">
+      <option value="none">None</option>
+      <option value="blur">模糊</option>
+      <option value="grayscale">灰色调</option>
+      <option value="invert">反色</option>
+      <!-- <option value="sepia">褐色</option> -->
+    </select>
+  </div>
+  <div class="snapshot_wrap">
+    <button id="snapshotBtn">点击截图：</button>
+    <div>
+     <span>原始截图：</span>
+     <canvas id="snapshotCanvas"></canvas>
+     <span>滤镜截图：</span>
+     <canvas id="snapshotFilterCanvas"></canvas>
+    </div>
+  </div>
+  <div class="audio_wrap">
+    <button id="audioToggle">显示音频控制器：</button>
+    <audio controls autoplay id="audio"></audio>
+  </div>
 
 </body>
-<script src="//cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init()</script>
+<!-- <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init()</script> -->
 <script src="./js/adapter-latest.js"></script>
-<script src="./js/mediaStream.js"></script>
+<script type="module" src="./js/mediaStream.js"></script>
 </html>

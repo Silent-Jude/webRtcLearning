@@ -1,11 +1,10 @@
 'use strict'
-var http = require('http')
-var https = require('https')
-var fs = require('fs')
-var express = require('express')
-var serveIndex = require('serve-index')
-
-
+// const http = require('http')
+const https = require('https')
+const fs = require('fs')
+const express = require('express')
+const serveIndex = require('serve-index')
+const socketIo = require('socket.io')
 
 const app = express()
 
@@ -25,6 +24,46 @@ const options = {
   cert: fs.readFileSync('./cert/tongyichen.com.pem'),
 }
 const https_server = https.createServer(options,app,(req, res)=>{})
+// bind socket.io with https_server
+const io = socketIo.listen(https_server)
+
+//io.sockets 站点， socket，当前客户端。
+io.sockets.on('connection', socket => { // socket代表每一个客户端
+  socket.on('join', roomId => {
+    console.log('join success, roomId is ', roomId)
+    socket.join(roomId)
+    const myRoom = io.sockets.adapter.rooms[room]
+    const userCount = Object.keys(myRoom.sockets).length
+    console.log(`the number of user is : ${userCount}`)
+    // socket.emit('joined', roomId, socket.id) // 给该客户端单独返回消息。
+    // socket.to(roomId).emit('joined', roomId, socket.id) // 给房间内，除了自己以外的所有人返回消息。
+    io.in(room).emit('joined', {  // 给房间内的所有人都发送消息。   
+      userCount,
+      roomId,
+      id: socket.id
+    }) 
+    // socket.broadcast.emit('joined', roomId, socket.id) // 给出了自己，全部站点的所有人发送消息。broadcast 广播
+  })
+
+  socket.on('leave', roomId => {
+    console.log('join success, roomId is ', roomId)
+    socket.leave(roomId)
+    const myRoom = io.sockets.adapter.rooms[room]
+    const userCount = Object.keys(myRoom.sockets).length
+    console.log(`the number of user is : ${userCount}`)
+    // socket.emit('joined', roomId, socket.id) // 给该客户端单独返回消息。
+    // socket.to(roomId).emit('joined', roomId, socket.id) // 给房间内，除了自己以外的所有人返回消息。
+    io.in(room).emit('left',{  // 给房间内的所有人都发送消息。   
+      userCount,
+      roomId,
+      id: socket.id
+    }) // 给房间内的所有人都发送消息。    
+    // socket.broadcast.emit('left', roomId, socket.id) // 给出了自己，全部站点的所有人发送消息。broadcast 广播
+  })
+
+})
+
+
 https_server.listen(443,'0.0.0.0', _=>{
   console.log(`https服务器创建成功！启动时间:${new Date().toLocaleString()}`)
   console.log('访问地址:')
@@ -34,7 +73,7 @@ https_server.listen(443,'0.0.0.0', _=>{
 })
 
 
-// var app = https.createServer(options,(req, res)=>{
+// const app = https.createServer(options,(req, res)=>{
 //   console.log('req', req)
 //   console.log('res', res)
 //   res.writeHead(200,{
