@@ -25,7 +25,7 @@ const options = {
 }
 const https_server = https.createServer(options,app,(req, res)=>{})
 // bind socket.io with https_server
-const io = socketIo.listen(https_server)
+const io = socketIo(https_server)
 
 //io.sockets 站点， socket，当前客户端。
 io.sockets.on('connection', socket => { // socket代表每一个客户端
