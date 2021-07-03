@@ -24,12 +24,12 @@
     </div>
     <div>
       <div>聊天框：</div>
-      <textarea style="width:500px;height:200px" v-text="chatData"></textarea>
+      <textarea style="width:500px;height:200px" v-html="chatData"></textarea>
     </div>
     <hr>
     <div>
       <div>输入框：</div>
-      <textarea style="width:500px;height:70px" v-text="inputData"></textarea>
+      <textarea style="width:500px;height:70px" v-model="inputData"></textarea>
       <div> <button @click="sendMessage">发送消息</button> </div>
     </div>
   </div>
@@ -44,38 +44,39 @@ var app = new Vue({
     message: 'Hello Vue!',
     userName: '',
     roomId: '',
-    chatData: '暂无聊天数据',
+    chatData: '',
     inputData: '',
     socket: null
   },
   methods: {
     sendMessage() {
-
+      let data = `${this.userName}:${this.inputData}`
+      console.log('发送的消息为', data)
+      this.socket.emit('message', this.roomId, data)
+      this.inputData = ''
     },
     joinRoom() {
-
       // 建立链接 connect中为链接的socket.io服务器的地址
-      socket = io.connect('https://www.tongyichen.com/')
+      // this.socket = io.connect('https://192.168.1.153')
+      this.socket = io.connect('https://tongyichen.com')
+
 
       // recieve message ，接收消息
 
-      socket.on('joined', ({userCount, roomId, id}) => {
-
+      this.socket.on('joined', ({userCount, roomId, id}) => {
+        this.joinStatus = true
       })
-      socket.on('left', ({userCount, roomId, id}) => {
-          
+      this.socket.on('left', ({userCount, roomId, id}) => {
+        this.joinStatus = false
       })
-      socket.on('message', ({userCount, roomId, id, data}) => {
-          
+      this.socket.on('message', ({userCount, roomId, id, data}) => {
+        this.chatData = this.chatData + data + '\n'
       })
-
-
       // send message，发送消息。
-
-
+      console.log('roomId', this.roomId)
+      this.socket.emit('join', this.roomId)
     },
     leaveRoom() {
-
     }
   },
   created() {

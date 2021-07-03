@@ -5,7 +5,7 @@ const fs = require('fs')
 const express = require('express')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
-const cors = require('cors')
+// const cors = require('cors')
 
 const app = express()
 
@@ -14,12 +14,12 @@ app.use(serveIndex('./public'))
 // 静态资源发布到指定目录
 app.use(express.static('./public'))
 
-app.use(
-	cors({
-		credentials: true,
-		origin: ['http://127.0.0.1:5500'],
-	})
-)
+// app.use(
+// 	cors({
+// 		credentials: true,
+// 		origin: ['http://127.0.0.1:5500'],
+// 	})
+// )
 
 // http_server
 // const http_server = http.createServer(app)
@@ -31,9 +31,15 @@ const options = {
 	key: fs.readFileSync('./cert/tongyichen.com.key'),
 	cert: fs.readFileSync('./cert/tongyichen.com.pem'),
 }
-const https_server = https.createServer(options, app, (req, res) => {})
-// bind socket.io with https_server
-const io = socketIo(https_server)
+const https_server = https.createServer(options, app, (req, res) => {
+  console.log('req', req)
+})
+// bind socket.io with https_server, options 参考https://www.w3cschool.cn/socket/socket-odxe2egl.html
+const io = socketIo(https_server, {
+  cors: true // 中文文档没更新，看代码找到的设置cors为true即可解决跨域问题，nice
+})
+// io.listen(12312)
+// console.log('io',io)
 
 //io.sockets 站点， socket，当前客户端。
 io.sockets.on('connection', (socket) => {
@@ -41,12 +47,12 @@ io.sockets.on('connection', (socket) => {
 	socket.on('join', (roomId) => {
 		console.log('join success, roomId is ', roomId)
 		socket.join(roomId)
-		const myRoom = io.sockets.adapter.rooms[room]
-		const userCount = Object.keys(myRoom.sockets).length
+		// const myRoom = io.sockets.adapter.rooms[roomId]
+    const userCount = io.sockets.adapter.rooms.get(roomId).size
 		console.log(`the number of user is : ${userCount}`)
 		// socket.emit('joined', roomId, socket.id) // 给该客户端单独返回消息。
 		// socket.to(roomId).emit('joined', roomId, socket.id) // 给房间内，除了自己以外的所有人返回消息。
-		io.in(room).emit('joined', {
+		io.in(roomId).emit('joined', {
 			// 给房间内的所有人都发送消息。
 			userCount,
 			roomId,
@@ -58,12 +64,12 @@ io.sockets.on('connection', (socket) => {
 	socket.on('leave', (roomId) => {
 		console.log('join success, roomId is ', roomId)
 		socket.leave(roomId)
-		const myRoom = io.sockets.adapter.rooms[room]
-		const userCount = Object.keys(myRoom.sockets).length
+		// const myRoom = io.sockets.adapter.rooms[roomId]
+    const userCount = io.sockets.adapter.rooms.get(roomId).size
 		console.log(`the number of user is : ${userCount}`)
 		// socket.emit('joined', roomId, socket.id) // 给该客户端单独返回消息。
 		// socket.to(roomId).emit('joined', roomId, socket.id) // 给房间内，除了自己以外的所有人返回消息。
-		io.in(room).emit('left', {
+		io.in(roomId).emit('left', {
 			// 给房间内的所有人都发送消息。
 			userCount,
 			roomId,
@@ -73,9 +79,10 @@ io.sockets.on('connection', (socket) => {
 	})
 
 	socket.on('message', (roomId, data) => {
-		socket.to(roomId).emit('message', {
-			// 给房间内，除了自己以外的所有人返回消息。
-			userCount,
+    console.log('收到消息', data)
+		// socket.to(roomId).emit('message', {
+		io.in(roomId).emit('message', {
+			// 给房间内的所有人都发送消息。
 			roomId,
 			id: socket.id,
 			data,
