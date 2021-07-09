@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>基于socket.io的简单信令服务器</title>
   <style>
 
   </style>
@@ -60,9 +60,6 @@ var app = new Vue({
       // this.socket = io.connect('https://192.168.1.153')
       this.socket = io.connect('https://tongyichen.com')
 
-
-      // recieve message ，接收消息
-
       this.socket.on('joined', ({userCount, roomId, id}) => {
         this.joinStatus = true
       })
@@ -72,7 +69,7 @@ var app = new Vue({
       this.socket.on('message', ({userCount, roomId, id, data}) => {
         this.chatData = this.chatData + data + '\n'
       })
-      // send message，发送消息。
+
       console.log('roomId', this.roomId)
       this.socket.emit('join', this.roomId)
     },

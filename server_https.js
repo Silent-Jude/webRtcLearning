@@ -5,7 +5,6 @@ const fs = require('fs')
 const express = require('express')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
-// const cors = require('cors')
 
 const app = express()
 
@@ -14,19 +13,6 @@ app.use(serveIndex('./public'))
 // 静态资源发布到指定目录
 app.use(express.static('./public'))
 
-// app.use(
-// 	cors({
-// 		credentials: true,
-// 		origin: ['http://127.0.0.1:5500'],
-// 	})
-// )
-
-// http_server
-// const http_server = http.createServer(app)
-// http_server.listen(80,'0.0.0.0', _=>{
-//   console.log('http服务器创建成功！访问地址:http://106.55.160.183:80')
-// })
-
 const options = {
 	key: fs.readFileSync('./cert/tongyichen.com.key'),
 	cert: fs.readFileSync('./cert/tongyichen.com.pem'),
@@ -34,12 +20,10 @@ const options = {
 const https_server = https.createServer(options, app, (req, res) => {
   console.log('req', req)
 })
-// bind socket.io with https_server, options 参考https://www.w3cschool.cn/socket/socket-odxe2egl.html
+// bind socket.io with https_server, options 参考https://www.w3cschool.cn/socket/socket-odxe2egl.html,此文档并不齐全。
 const io = socketIo(https_server, {
   cors: true // 中文文档没更新，看代码找到的设置cors为true即可解决跨域问题，nice
 })
-// io.listen(12312)
-// console.log('io',io)
 
 //io.sockets 站点， socket，当前客户端。
 io.sockets.on('connection', (socket) => {
@@ -96,19 +80,3 @@ https_server.listen(443, '0.0.0.0', (_) => {
 	console.log('https://106.55.160.183:443')
 	console.log('https://tongyichen.com')
 })
-
-// const app = https.createServer(options,(req, res)=>{
-//   console.log('req', req)
-//   console.log('res', res)
-//   res.writeHead(200,{
-//     'Content-Type': 'text/plain'
-//   })
-//   res.end('Hello World!\n')
-// });
-
-// // 0.0.0.0 代表任意网口
-// app.listen(8899,() => {
-//   console.log('服务器创建成功！')
-//   console.log('访问地址:https://192.168.1.153:8899')
-
-// });

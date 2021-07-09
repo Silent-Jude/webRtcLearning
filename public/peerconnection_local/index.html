@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>peerconnection点对点音视频互通(不含信令服务器)</title>
+    <style>
+      .btn_wrap{
+        display: flex;
+      }
+      .btn{
+        margin-right: 15px;
+      }
+      .video_wrap{
+        display: flex;
+      }
+      .col{
+        margin-right: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .sdp{
+        width: 200px;
+      }
+
+    </style>
+	</head>
+	<body>
+		<div id="app">
+      <div class="content">
+        <div class="btn_wrap">
+          <button class="btn" @click="startCollect">开始采集数据，只看的到本地</button>
+          <button class="btn" @click="call">呼叫，能看到远端</button>
+          <button class="btn" @click="hangup">挂断</button>
+        </div>
+
+        <div class="video_wrap">
+          <div class="left col">
+            <span>本地视频流：</span>
+            <video :width="videoSize" :height="videoSize" autoplay ref="localVideo"></video>
+            <span>offer SDP</span>
+            <textarea class="sdp" readonly :value="offerSDP" cols="30" rows="10"></textarea>
+          </div>
+          <div class="right col">
+            <span>远端视频流：</span>
+            <video :width="videoSize" :height="videoSize" autoplay ref="remoteVideo"></video>
+            <span>answer SDP</span>
+            <textarea class="sdp" readonly :value="answerSDP" cols="30" rows="10"></textarea>
+          </div>
+        </div>
+
+      </div>
+		</div>
+	</body>
+	<script src="./js/socket.io.js"></script>
+	<script src="./js/adapter-latest.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+	<script>
+		var app = new Vue({
+			el: '#app',
+			data: {
+        answerSDP: '',
+        offerSDP: '',
+        pcLocal: null,
+        pcRemote: null,
+        localStream : null,
+        constraints: {
+          audio: false,
+          video: true
+        },
+        videoSize:200,
+			},
+			methods: {
+        /**
+         * 开始采集，收集本地媒体流信息，并展示。
+        */
+        startCollect() {
+          if(!window.navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.log('the getUserMedia is not supported!')
+            return false
+          } else {
+            window.navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
+              this.localStream = stream
+              this.$refs.localVideo.srcObject = stream
+              console.log('this.$refs.localVideo.srcObject', this.$refs.localVideo.srcObject)
+            }).catch(err => {
+              console.log('音视频采集错误！', err)
+            })
+          }
+        },
+        /**
+         * 开始链接，
+         * 先创建本地
+        */
+        call() {
+          this.pcLocal = new RTCPeerConnection()
+          this.pcRemote = new RTCPeerConnection()
+
+          this.localStream.getTracks().forEach(track => {
+            this.pcLocal.addTrack(track, this.localStream)
+          })
+
+          const offerOptions = {
+            offerToRecieveAudio: 0,
+            offerToRecieveVideo: 1,
+          }
+
+          const getanswer = desc => {
+            this.pcRemote.setLocalDescription(desc)
+            this.answerSDP = desc.sdp
+            // send desc to signal
+            // pcLocal receive desc from signal
+            this.pcLocal.setRemoteDescription(desc)
+            console.log('getanswer')
+          }
+
+          const getOffer = desc => {
+            this.pcLocal.setLocalDescription(desc)
+            this.offerSDP = desc.sdp
+            // send desc to signal
+            // pcRemote receive desc from signal
+            this.pcRemote.setRemoteDescription(desc)
+            this.pcRemote.createAnswer().then(getanswer).catch(err => console.log('远端answer创建失败', err))
+          }
+
+          this.pcLocal.createOffer(offerOptions).then(getOffer).catch(err => console.log('本地offer创建失败', err))
+
+          // 这几个事件是异步回调。
+          /**
+           * 
+          */
+          this.pcLocal.onicecandidate = e => {
+            // pcLocal send candidate to signal
+            // pcRemote revieve candidate from signal
+            console.log('pcLocal.onicecandidate')
+            this.pcRemote.addIceCandidate(e.candidate)
+          }
+          this.pcRemote.onicecandidate = e => {
+            console.log('pcRemote.onicecandidate')
+            this.pcLocal.addIceCandidate(e.candidate)
+          }
+          this.pcRemote.ontrack = e => {
+            console.log('pcRemote.onTrack')
+            this.$refs.remoteVideo.srcObject = e.streams[0]
+          }
+
+        },
+        hangup() {
+          this.pcLocal.close()
+          this.pcRemote.close()
+          this.pcLocal = null
+          this.pcRemote = null
+
+        },
+			},
+			created() {
+				console.log('io', io)
+			},
+		})
+	</script>
+<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init()</script>
+</html>
