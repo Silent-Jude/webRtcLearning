@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "supervisor server_https",
     "dev": "supervisor server_https",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

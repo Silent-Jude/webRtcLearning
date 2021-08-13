@@ -103,9 +103,10 @@ const getUserMedia = (_) => {
 			if ('srcObject' in videoPlay) {
 				video.srcObject = stream
 			} else {
-				// 防止在新的浏览器里使用它，应为它已经不再支持了
+				// 防止在旧的浏览器里使用它，应为它已经不再支持了
 				videoPlay.src = window.URL.createObjectURL(stream)
 			}
+      
       mediaStream = stream
       
       // 媒体流的一些方法

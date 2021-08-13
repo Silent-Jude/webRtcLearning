@@ -29,15 +29,10 @@
 	<body>
 		<div id="app">
       <div class="content">
-        <div class="roomId" style="margin-bottom:15px">
-          请输入房间号：
-          <input type="text" v-model="roomId">
-        </div>
         <div class="btn_wrap">
-          <!-- <button class="btn" @click="openLocalVideo">开始采集数据，只看的到本地</button> -->
-          <button class="btn" @click="joinRoom">加入房间</button>
-          <!-- <button class="btn" @click="call">呼叫，能看到远端</button> -->
-          <button class="btn" @click="leaveRoom">离开房间</button>
+          <button class="btn" @click="startCollect">开始采集数据，只看的到本地</button>
+          <button class="btn" @click="call">呼叫，能看到远端</button>
+          <button class="btn" @click="hangup">挂断</button>
         </div>
 
         <div class="video_wrap">
@@ -65,8 +60,6 @@
 		var app = new Vue({
 			el: '#app',
 			data: {
-        roomId: '',
-        socket: null,
         answerSDP: '',
         offerSDP: '',
         pcLocal: null,
@@ -80,60 +73,20 @@
 
 			},
 			methods: {
-
-        leaveRoom() {
-
-        },
-        joinRoom() {
-          // 开启本地的音视频设备。
-          this.openLocalVideo()
-        },
-        connectionServe() {
-          this.socket = window.io.connect()
-          this.socket.on('joined', (roomId, userId) => {
-            console.log('joined 接收到信令服务器的返回，房间号和id分别是：', roomId, userId)
-          })
-
-          this.socket.on('otherJoin', (roomId, userId) => {
-            console.log('otherJoin 接收到信令服务器的返回，房间号和id分别是：', roomId, userId)
-          })
-
-          this.socket.on('full', (roomId, userId) => {
-            console.log('full 接收到信令服务器的返回，房间号和id分别是：', roomId, userId)
-          })
-
-          this.socket.on('leaved', (roomId, userId) => {
-            console.log('leaved 接收到信令服务器的返回，房间号和id分别是：', roomId, userId)
-          })
-          this.socket.on('bye', (roomId, userId) => {
-            console.log('bye 接收到信令服务器的返回，房间号和id分别是：', roomId, userId)
-          })
-
-          this.socket.on('message', (roomId, data) => {
-            console.log(`message 接收到信令服务器的返回，房间号是：${ roomId}, 内容是： ${ data}`)
-          })
-          const roomId = this.roomId || '00001'
-          this.socket.emit('join', roomId )
-
-
-        },
         /**
-         * 开启本地的音视频设备。
          * 开始采集，收集本地媒体流信息，并展示。
         */
-        openLocalVideo() {
+        startCollect() {
           if(!window.navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.log('the getUserMedia is not supported!')
             return false
           } else {
             window.navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
               this.localStream = stream
-              this.$refs.localVideo.srcObject = this.localStream
+              this.$refs.localVideo.srcObject = stream
               console.log('this.$refs.localVideo.srcObject', this.$refs.localVideo.srcObject)
-              return true
             }).catch(err => {
               console.log('音视频采集错误！', err)
-              return false
             })
           }
         },
